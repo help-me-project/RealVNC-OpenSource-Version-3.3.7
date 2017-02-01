@@ -1,0 +1,18 @@
+
+SRCS = vncconnect.c
+
+OBJS = vncconnect.o
+
+program = vncconnect
+
+EXTRA_LIBS = @X_PRE_LIBS@ @X_LIBS@ -lX11 -lXext @X_EXTRA_LIBS@
+
+DIR_CPPFLAGS = @X_CFLAGS@ # X_CFLAGS are really CPPFLAGS
+
+all:: $(program)
+
+$(program): $(OBJS) $(DEP_LIBS)
+	rm -f $(program)
+	$(CCLD) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJS) $(DEP_LIBS) $(LIBS) $(EXTRA_LIBS)
+
+# followed by boilerplate.mk

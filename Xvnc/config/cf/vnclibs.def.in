@@ -1,0 +1,24 @@
+/*
+ * vnclibs.def.in - tells Xvnc where to pick up external VNC libraries
+ *
+ * Whenever you change this file, you need to run configure and then remake
+ * the Makefiles in
+ * lib/font/fontfile, programs/Xserver and programs/Xserver/hw/vnc 
+ */
+
+CXX = @CXX@
+CXXFLAGS = @CXXFLAGS@
+
+CCLINK = $(CXX)
+
+RFB_TOP = $(TOP)/..
+
+top_srcdir = $(RFB_TOP)
+
+ZLIB_INCLUDE = @ZLIB_INCLUDE@
+
+VNCLIBS = $(RFB_TOP)/rdr/librdr.a $(RFB_TOP)/rfb/librfb.a @ZLIB_LIB@
+
+VNCSYSLIBS =
+
+VNCCPPFLAGS = -I$(RFB_TOP)

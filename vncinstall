@@ -1,0 +1,74 @@
+#!/bin/sh
+#
+#  Copyright (C) 2002 RealVNC Ltd.
+#
+#  This is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation; either version 2 of the License, or
+#  (at your option) any later version.
+#
+#  This software is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this software; if not, write to the Free Software
+#  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307,
+#  USA.
+#
+
+#
+# vncinstall - copy the VNC programs to an installation directory.
+# Also tries to install the manual pages somewhere sensible.
+#
+
+if [ $# -lt 1 -o $# -gt 2 -o ! -d "$1" ]; then 
+  echo "usage: $0 <installation-directory> [<man-page-directory>]"
+  echo "e.g.   $0 /usr/local/bin"
+  exit 1
+fi
+
+dst=$1
+shift
+if [ $# -eq 1 ]; then
+  mandst="$1/man1"
+else
+  if [ "`basename $dst`" = bin ]; then
+    mandst="`dirname $dst`/man/man1"
+    if [ ! -d "$mandst" -a "$dst" = /usr/bin ]; then
+      mandst=/usr/share/man/man1
+    fi
+  fi
+fi
+
+if [ "$mandst" != "" ]; then
+  if [ ! -d "$mandst" -o ! -w "$mandst" ]; then
+    echo "Can't install manual pages to $mandst"
+    mandst=""
+  fi
+fi
+
+for f in Xvnc/programs/Xserver/Xvnc vncviewer/vncviewer \
+	 vncpasswd/vncpasswd vncconnect/vncconnect vncserver; do
+
+  if cmp -s $f $dst/`basename $f`; then
+    echo "`basename $f` hasn't changed"
+  else
+    echo "Copying $f to $dst"
+    cp -pf $f $dst
+    chmod 0555 $dst/`basename $f`
+  fi
+
+
+  if [ "$mandst" != "" -a -d "$mandst" ]; then
+    if cmp -s $f.man $mandst/`basename $f.1`; then
+      echo "`basename $f.man` hasn't changed"
+    else
+      echo "Copying $f.man to $mandst/`basename $f.1`"
+      cp -pf $f.man $mandst/`basename $f.1`
+      chmod 0444 $mandst/`basename $f.1`
+    fi
+  fi
+
+done

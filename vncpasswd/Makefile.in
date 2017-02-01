@@ -1,0 +1,18 @@
+
+SRCS = vncpasswd.c
+
+OBJS = vncpasswd.o
+
+program = vncpasswd
+
+DEP_LIBS = ../rfb/librfb.a
+
+DIR_CPPFLAGS = -I$(top_srcdir)
+
+all:: $(program)
+
+$(program): $(OBJS) $(DEP_LIBS)
+	rm -f $(program)
+	$(CCLD) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJS) $(DEP_LIBS) $(LIBS) $(EXTRA_LIBS)
+
+# followed by boilerplate.mk

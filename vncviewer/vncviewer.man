@@ -1,0 +1,412 @@
+.TH vncviewer 1 "15 August 2002" "RealVNC Ltd" "Virtual Network Computing"
+.SH NAME
+vncviewer \- VNC viewer for X
+.SH SYNOPSIS
+.B vncviewer
+.RI [ options ] 
+.RI [ host ][: display# ]
+.br
+.B vncviewer
+.RI [ options ] 
+.B \-listen
+.RI [ display# ]
+.SH DESCRIPTION
+.B vncviewer
+is a viewer (client) for Virtual Network Computing.  This manual page documents
+the version for the X window system.
+
+If you run the viewer with no arguments it will prompt you for a VNC server to
+connect to.  Alternatively, specify the VNC server as an argument, e.g.:
+
+.RS
+vncviewer snoopy:2
+.RE
+
+where 'snoopy' is the name of the machine, and '2' is the display number of the
+VNC server on that machine.  Either the machine name or display number can be
+omitted.  So for example ":1" means display number 1 on the same machine, and
+"snoopy" means "snoopy:0" i.e. display 0 on machine "snoopy".
+
+If the VNC server is successfully contacted, you will be prompted for a
+password to authenticate you.  If the password is correct, a window will appear
+showing the desktop of the VNC server.
+
+.SH AUTOMATIC PROTOCOL SELECTION
+
+From version 3.3.4 onwards, the viewer tests the speed of the connection to the
+server and chooses the encoding and pixel format appropriately.  This makes it
+much easier to use than previous versions where the user had to specify arcane
+command line arguments.
+
+The viewer starts out assuming the link is slow, using an 8-bit pixel format
+and using the encoding with the best compression.  If it turns out that the
+link is fast enough it switches to full-colour mode and will use an encoding
+which compresses less but is faster to generate, thus improving the interactive
+feel.  Automatic selection can be turned off with the \fB-noauto\fP option, or
+from the popup window.
+
+.SH POPUP WINDOW
+The viewer has a popup window containing a set of buttons which perform various
+actions.  It is usually brought up by pressing F8, but this is customisable, as
+is the entire contents of the popup.  Actions which buttons in the popup window
+can perform include:
+.RS 2
+.IP * 2
+switching in and out of full-screen mode
+.IP *
+quitting the viewer
+.IP *
+generating arbitrary key and mouse events, e.g. sending ctrl-alt-del
+.IP *
+transferring the clipboard to or from the VNC server
+.IP *
+switching on or off automatic selection of encoding and pixel format
+.IP *
+switching 8-bit mode on or off
+.RE
+.PP
+By default, key presses in the popup window get sent to the VNC server and
+dismiss the popup.  So to get an F8 through to the VNC server simply press it
+twice.
+
+See the sections on customisation below for how to customise the contents of
+the popup window.
+
+.SH FULL SCREEN MODE
+A full-screen mode is supported.  This is particularly useful when connecting
+to a remote screen which is the same size as your local one. If the remote
+screen is bigger, you can scroll by bumping the mouse against the edge of the
+screen.
+
+Unfortunately this mode doesn't work completely with all window managers, since
+it breaks all the X window management conventions.  It tends to work better
+when the viewer is started in full-screen mode than when switching to it from
+normal mode.
+
+.SH OPTIONS
+You can get a list of options by giving \fB\-h\fP as an option to vncviewer.
+Most of these options can also be specified as X resources \- see the section
+on customisation below.
+
+.TP
+.B \-listen \fI[display-number]\fP
+Causes vncviewer to listen on port 5500 +
+.I display-number
+for reverse connections from a VNC server.  WinVNC supports reverse connections
+initiated using the 'Add New Client' menu option or the '\-connect' command-line
+option.  Xvnc supports reverse connections with a helper program called
+.B vncconnect.
+
+.TP
+.B \-shared
+When you make a connection to a VNC server, all other existing connections are
+normally closed.  This option requests that they be left open, allowing you to
+share the desktop with someone already using it.
+.TP
+.B \-display \fIXdisplay\fP
+Specifies the X display on which the VNC viewer window should appear.
+
+.TP
+.B \-passwd \fIpassword-file\fP
+If you are on a filesystem which gives you access to the password file used by
+the server, you can specify it here to avoid typing it in.  It will usually be
+"~/.vnc/passwd".
+
+.TP
+.B \-viewonly
+Specifies that no keyboard or mouse events should be sent to the server.
+Useful if you want to view a desktop without interfering; often needs to be
+combined with
+.B \-shared.
+
+.TP
+.B \-fullscreen
+Start in full-screen mode.
+
+.TP
+.B \-geometry \fIgeometry\fP
+Standard X position and sizing specification.
+
+.TP
+.B \-noauto
+Turn off the automatic selection of encoding and pixel format.  Normally the
+viewer tests the speed of the connection to the server and chooses the encoding
+and pixel format appropriately.
+
+.TP
+.B \-8bit, \-bgr233
+This option implies
+.B \-noauto.
+Tells the VNC server to send pixels which are only 8 bits deep.  If your server
+desktop is deeper than this then it will translate the pixels before sending
+them. Less data will generally be sent over then network, which can be a big
+advantage on slow links, but you may get some colour mismatches.  "BGR233"
+means an 8-bit true colour pixel format, with the most significant two bits of
+each byte representing the blue component, the next three bits representing
+green and the least significant three representing red.  This format is also
+used by the java client.
+
+.TP
+.B \-encodings \fIencodings\fP
+This option implies
+.B \-noauto.
+This option specifies a list of encodings to use in order of preference,
+separated by spaces.
+For example, to use only raw and CopyRect, specify "raw copyrect".
+
+.TP
+.B \-owncmap
+Try to use a PseudoColor visual and a private colormap - this allows the VNC
+server to control the colormap.
+
+.TP
+.B \-truecolour
+Try to use a TrueColor visual.
+
+.TP
+.B \-depth \fId\fP
+This is only useful on a (real) X server which supports multiple TrueColor
+depths.  On such a display vncviewer will try to find a Visual of the given
+depth.  If successful this means that the appropriate pixel format will be
+requested from the VNC server.  You cannot use this to force a particular depth
+from the VNC server.  The only option which does this is \-bgr233.
+
+.SH CUSTOMISATION
+The behaviour of vncviewer is extremely customisable using X resources.  You
+can set X resources by any of the usual means - in an app-defaults file such as
+".Xresources", or on the command line with the -xrm option, e.g.:
+.RS
+vncviewer \-xrm '*nColours:64'
+.RE
+See the X window
+system documentation for details.
+
+The application resources are:
+.TP
+.BR shareDesktop " (option \-shared)"
+Whether to leave other viewers connected.  Default false.
+.TP
+.BR viewOnly " (option \-viewonly)"
+Block mouse and keyboard events.  Default false.
+.TP
+.BR fullScreen " (option \-fullscreen)"
+Full screen mode.  Default false.
+.TP
+.BR passwordFile " (option \-passwd)"
+File from which to get the password (as generated by the vncpasswd
+program).  Default is null, i.e. to request password from the user.
+.TP
+.B passwordDialog
+Whether to use a dialog box to get the password (true) or get it from the
+tty (false).  Irrelevant if passwordFile is set.  Default false.
+.TP
+.BR autoDetect " (option \-noauto turns off)"
+Whether to automatically select encoding and pixel format based on the speed of
+the connection to the server.  Default true.
+.TP
+.BR encodings " (option \-encodings)"
+A list of encodings to use in order of preference, separated by spaces.
+Default is null.
+.TP
+.BR useBGR233 " (option \-8bit or \-bgr233)"
+Always use the BGR233 (8-bit) pixel format on the wire, regardless of the
+visual.  Default is false, although autoDetect may choose BGR233 anyway, and
+BGR233 is always used for non-TrueColor visuals with forceOwnCmap false.
+.TP
+.B nColours
+When using BGR233, try to allocate this many "exact" colours from the
+BGR233 colour cube.  When using a shared colormap, setting this resource
+lower leaves more colours for other X clients.  Irrelevant when using
+truecolour.  Default is 256 (i.e. all of them).
+.TP
+.B useSharedColours
+If the number of "exact" BGR233 colours successfully allocated is less than
+256 then the rest are filled in using the "nearest" colours available.
+This resource says whether to only use the "exact" BGR233 colours for this
+purpose, or whether to use other clients' "shared" colours as well.
+Default true (i.e. use other clients' colours).
+.TP
+.BR forceOwnCmap " (option \-owncmap)"
+Try to use a PseudoColor visual and a private colormap - this allows the
+VNC server to control the colormap.  Default false.
+.TP
+.BR forceTrueColour " (option \-truecolour)"
+Try to use a TrueColor visual.  Default false.
+.TP
+.BR requestedDepth " (option \-depth)"
+If forceTrueColour is true, try to use a visual of this depth.  Default 0
+(i.e. any depth).
+.TP
+.B useSharedMemory
+Whether to use the MIT shared memory extension if on the same machine as
+the X server.  Default true.
+.TP
+.B wmDecorationWidth, wmDecorationHeight
+The total width and height taken up by window manager decorations.  This is
+used to calculate the maximum size of the VNC viewer window.  Default is
+width 4, height 24.
+.TP
+.B bumpScrollTime, bumpScrollPixels
+When in full screen mode and the VNC desktop is bigger than the X display,
+scrolling happens whenever the mouse hits the edge of the screen.  The
+maximum speed of scrolling is bumpScrollPixels pixels every bumpScrollTime
+milliseconds.  The actual speed of scrolling will be slower than this, of
+course, depending on how fast your machine is.  Default 20 pixels every 25
+milliseconds.
+.TP
+.B popupButtonCount
+The number of buttons in the popup window.  See below for how to customise the
+buttons.
+.TP
+.B rawDelay
+This is useful for debugging VNC servers by checking exactly which parts of
+the screen are being updated.  For each update rectangle vncviewer puts up
+a black rectangle for the given time in milliseconds before putting up the
+pixel data.  This only highlights pixel data sent using the raw encoding.
+Default 0 (i.e. don't do it).
+.TP
+.B copyRectDelay
+Similar to rawDelay, but highlights the areas copied using the copyrect
+encoding.
+
+.SS "CUSTOMISING THE POPUP WINDOW"
+Set the number of buttons with the popupButtonCount resource, e.g.:
+
+.RS 1
+ *popupButtonCount: 2
+.RE
+
+For each button, set the label, and override the button press translations,
+e.g.:
+
+.RS 1
+ *popup*button1.label: Left mouse button click at 100,100
+ *popup*button1.translations: #override\\n\\
+   <Btn1Down>,<Btn1Up>: SendRFBEvent(ptr,100,100,1)\\
+                        SendRFBEvent(ptr,100,100,0)
+
+ *popup*button2.label: Send "Think thin!"
+ *popup*button2.translations: #override\\n\\
+   <Btn1Down>,<Btn1Up>:\\
+     SendRFBEvent(key,T) SendRFBEvent(key,h)\\
+     SendRFBEvent(key,i) SendRFBEvent(key,n)\\
+     SendRFBEvent(key,k) SendRFBEvent(key,space)\\
+     SendRFBEvent(key,t) SendRFBEvent(key,h)\\
+     SendRFBEvent(key,i) SendRFBEvent(key,n)\\
+     SendRFBEvent(key,exclam)
+.RE
+
+.SS "CUSTOMISING THE DESKTOP WINDOW"
+You can override translations on the desktop window.  For example to change the
+key used to bring up to popup window from F8 to Escape, and make F12 switch in
+and out of full screen mode:
+
+.RS 1
+ *desktop.translations: #override\\n\\
+    <Key>F8: SendRFBEvent()\\n\\
+    <Key>Escape: ShowPopup()\\n\\
+    <Key>F12: ToggleFullScreen()
+.RE
+
+.SS "X RESOURCE ACTIONS"
+These are the actions which you can use in X resource translations:
+.TP 3
+.B ShowPopup(), HidePopup()
+Show and hide the popup window, respectively.
+.TP
+.B SendRFBEvent()
+Send an RFB event to the VNC server.  With no argument, simply sends the
+RFB equivalent of the X event which caused the action.  With arguments,
+generates either key or pointer events depending on the arguments:
+
+.br
+SendRFBEvent(keydown,\fIkeysym\fP)
+.br
+SendRFBEvent(keyup,\fIkeysym\fP)
+.br
+SendRFBEvent(key,\fIkeysym\fP) (short for keydown then keyup)
+.br
+SendRFBEvent(ptr,\fIx\fP,\fIy\fP,\fIbuttonMask\fP)
+.br
+SendRFBEvent(ptr,\fIbuttonMask\fP)
+.br
+
+where
+.RS
+.IP * 2
+\fIkeysym\fP is the string representing an X keysym.  The best way to find
+these is to use "xev", or look in /usr/include/X11/keysymdef.h and strip off
+the "XK_".
+.IP *
+\fIx\fP and \fIy\fP are the position of the pointer event.  If not specified,
+use the position of the X event which caused the action.
+.IP *
+\fIbuttonMask\fP is a bit mask representing buttons 1 to 8 with bits 0 to 7
+respectively, 0 meaning up, 1 meaning down (pressed).  So 0 means no buttons, 1
+means button 1 pressed, 5 means buttons 1 & 3 pressed, etc.
+.RE
+.TP
+.B SelectionToVNC()
+Send the local X selection or cut buffer to the VNC server.  This is usually
+invoked when the mouse enters the viewer window.  With no argument or an
+argument "new", this is only done if this is a "new" selection, i.e. it hasn't
+already been sent.  With an argument "always", it is sent each time.
+.TP
+.B SelectionFromVNC()
+Set the local X selection and cut buffer to the current value of the VNC
+server "cut text".  This is usually invoked when the mouse leaves the
+viewer window.  With no argument or an argument "new", this is only done if
+there has been new "cut text" since the last time it was called.  With an
+argument "always", it is set each time.
+.TP
+.B Quit()
+Quit the VNC viewer.
+.TP
+.B Pause()
+Pause for a given number of milliseconds (100 by default).  This is
+sometimes useful to space out events generated by SendRFBEvent.
+.TP
+.B ToggleFullScreen()
+Toggle in and out of full screen mode.
+.TP
+.B SetFullScreenState()
+Sets the "state" resource of a toggle widget to reflect whether we're in
+full screen mode.
+.TP
+.B ToggleBGR233()
+Toggle 8-bit (BGR233) mode.
+.TP
+.B SetBGR233State()
+Sets the "state" resource of a toggle widget to reflect whether we're in
+8-bit mode.
+.TP
+.B ToggleAuto()
+Toggle automatic selection of encoding and format.
+.TP
+.B SetAutoState()
+Sets the "state" resource of a toggle widget to reflect whether the viewer is
+automatically selecting encoding and format.
+.TP
+.B ServerDialogDone(), PasswordDialogDone()
+Used to tell the dialog boxes that entry has finished.  Usually invoked by
+the return key.
+
+.SH BUGS
+.B vncviewer
+uses the original X11 Athena widget set which is a little bit out of date.  On
+the plus side it is available in every installation of the X window system.
+
+.SH SEE ALSO
+.BR vncconnect (1),
+.BR vncpasswd (1),
+.BR vncserver (1),
+.BR Xvnc (1)
+.br
+http://www.realvnc.com
+
+.SH AUTHOR
+Tristan Richardson, RealVNC Ltd.
+
+VNC was originally developed by the RealVNC team while at Olivetti Research Ltd
+/ AT&T Laboratories Cambridge.  It is now being maintained by RealVNC Ltd.  See
+http://www.realvnc.com for details.

@@ -1,0 +1,51 @@
+
+SRCS = \
+  argsresources.c \
+  colour.c \
+  desktop.c \
+  dialogs.c \
+  fullscreen.c \
+  listen.c \
+  misc.c \
+  popup.c \
+  rfbproto.c \
+  selection.c \
+  shm.c \
+  vncviewer.c \
+  sockets.cxx \
+  zrle.cxx
+
+OBJS = \
+  argsresources.o \
+  colour.o \
+  desktop.o \
+  dialogs.o \
+  fullscreen.o \
+  listen.o \
+  misc.o \
+  popup.o \
+  rfbproto.o \
+  selection.o \
+  shm.o \
+  vncviewer.o \
+  sockets.o \
+  zrle.o
+
+program = vncviewer
+
+DEP_LIBS = ../rfb/librfb.a ../rdr/librdr.a
+
+EXTRA_LIBS = @ZLIB_LIB@ @X_PRE_LIBS@ @X_LIBS@ -lXmu -lXaw -lXt -lX11 -lXext @X_EXTRA_LIBS@
+
+
+DIR_CPPFLAGS = -I$(top_srcdir) @SOCKLEN_T_DEFINE@ @X_CFLAGS@ # X_CFLAGS are really CPPFLAGS
+
+all:: $(program)
+
+$(program): $(OBJS) buildtime.o $(DEP_LIBS)
+	rm -f $(program)
+	$(CXXLD) $(CXXFLAGS) $(LDFLAGS) -o $@ $(OBJS) buildtime.o $(DEP_LIBS) $(LIBS) $(EXTRA_LIBS)
+
+buildtime.o: $(OBJS)
+
+# followed by boilerplate.mk

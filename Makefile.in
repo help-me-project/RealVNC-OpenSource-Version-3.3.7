@@ -1,0 +1,4 @@
+
+SUBDIRS = @ZLIB_DIR@ rdr rfb vncconnect vncpasswd vncviewer
+
+# followed by boilerplate.mk
